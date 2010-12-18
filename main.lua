@@ -1,32 +1,32 @@
 function love.load()
 	math.randomseed( os.time() )
-	-- objects; consist of image, visibility, position and 
 	images = {
 		orbiter = love.graphics.newImage("discovery-orbiter.png"),
 		booster = love.graphics.newImage("discovery-solid_rocket_booster.png"),
 		tank = love.graphics.newImage("discovery-external_fuel_tank.png"),
 	}
+	-- objects that have positions and need to be drawn
 	visObjects = {
 		orbiter = {
-			gfx = images.orbiter,
+			img = images.orbiter,
 			vis = true,
 			pos = {368,536},
 			rad = 0,
 		},
 		booster1 = {
-			gfx = images.booster,
+			img = images.booster,
 			vis = true,
 			pos = {358,536},
 			rad = 0,
 		},
 		booster2 = {
-			gfx = images.booster,
+			img = images.booster,
 			vis = true,
 			pos = {378,536},
 			rad = 0,
 		},
 		tank = {
-			gfx = images.tank,
+			img = images.tank,
 			vis = true,
 			pos = {368,536},
 			rad = 0,
@@ -35,7 +35,11 @@ function love.load()
 	timer = {
 		time = -20,
 	}
-	-- countdowns have a time which they take to finish and title and code that get shown/executed at timer end + successful player reaction
+	--[[ countdowns are the different stages in the game
+		time = duration of countdown
+		title gets shown to prepare the player 
+		code gets executed at timer end + successful player reaction
+	]]--
 	countdowns = {
 		{
 			title = "Sound Supression System Activation!",
@@ -69,15 +73,18 @@ function love.load()
 		},
 		{
 			title = "Docking Procedure!",
-			time = 20,
+			time = 10,
 			code = function()  end,
 		},
 
 	}
-	-- countdowns are not complete and not active by default
+	--[[ countdowns have neither started nor finished 
+		started = has started
+		finished = has finished
+	]]--
 	for i,v in ipairs(countdowns) do
-		countdowns[i].active = false
-		countdowns[i].done = false
+		countdowns[i].started = false
+		countdowns[i].finished = false
 	end
 	-- initial background color
 	love.graphics.setBackgroundColor( 40, 40, 80 )
@@ -92,7 +99,7 @@ end
 function love.draw(dt)
 	for i,v in pairs(visObjects) do
 		if v.vis then
-			love.graphics.draw(v.gfx, v.pos[1], v.pos[2], v.rad)
+			love.graphics.draw(v.img, v.pos[1], v.pos[2], v.rad)
 		end
 	end
 end
