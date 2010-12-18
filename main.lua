@@ -160,8 +160,10 @@ function love.draw(dt)
 	-- draw counter texts
 	if timers.countdown.time <= 3 then
 		love.graphics.print(countdowns[countdownCurrent].title ..
-			string.format("\n%01.2f",timers.countdown.time) ..
-		"\nPress SPACE when timer reaches Zero!", 80, 64)
+			string.format("\n%01.2f",timers.countdown.time),80,64)
+		if math.abs(timers.countdown.time) <= levels[level] then
+			love.graphics.print("Press SPACE!", 80, 96)
+		end
 	end
 end
 
