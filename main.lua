@@ -1,9 +1,15 @@
 function love.load()
 	math.randomseed( os.time() )
 	images = {
-		orbiter = love.graphics.newImage("discovery-orbiter.png"),
-		booster = love.graphics.newImage("discovery-solid_rocket_booster.png"),
-		tank = love.graphics.newImage("discovery-external_fuel_tank.png"),
+		orbiter = love.graphics.newImage("discovery-orbiter-big.png"),
+		booster = love.graphics.newImage("discovery-solid_rocket_booster-big.png"),
+		tank = love.graphics.newImage("discovery-external_fuel_tank-big.png"),
+		animations = {
+			cooling = {
+				love.graphics.newImage("animation-cooling-1-big.png"),
+				love.graphics.newImage("animation-cooling-2-big.png"),
+			}
+		},
 	}
 	-- objects that have positions and need to be drawn
 	visObjects = {
@@ -20,6 +26,22 @@ function love.load()
 			img = images.tank,
 		},
 	}
+	-- animations that are being played for a specific time
+	visAnimations = {
+		cooling = {
+			img = images.animations.cooling,
+			durationMax = 7,
+			started = false,
+			finished = false,
+			pos = {{374,508}, {426,508}, {400,508}},
+			origin = {64, 0},
+			speed = 0.3,
+			time = 0,
+			duration = 0,
+			current = 1,
+			rad = 0,
+		},
+	}
 	--[[ countdowns are the different stages in the game
 		time = duration of countdown
 		title gets shown to prepare the player 
@@ -30,7 +52,7 @@ function love.load()
 			title = "Sound Supression System Activation!",
 			time = 5,
 			code = {
-				success = function() end,
+				success = function() visAnimations.cooling.started = true end,
 				failure = function() end,
 			},
 		},
@@ -130,10 +152,10 @@ function gameStart()
 		visObjects[i].pos = {}
 	end
 	-- visObjects positionsReset
-	visObjects.orbiter.pos  = {368,536}
-	visObjects.booster1.pos = {358,536}
-	visObjects.booster2.pos = {378,536}
-	visObjects.tank.pos     = {368,536}
+	visObjects.orbiter.pos  = {400,300,256}
+	visObjects.booster1.pos = {324,300,256}
+	visObjects.booster2.pos = {476,300,256}
+	visObjects.tank.pos     = {400,300,256}
 	-- initial background color
 	love.graphics.setBackgroundColor( 40, 40, 80 )
 end
@@ -144,7 +166,24 @@ function love.update(dt)
 		if v.started then
 			timers[i].time = v.time - dt
 			-- visual timer for drawing
-			timers[i].visible = string.format("%03.2f", v.time)
+			timers[i].visible = string.format("%03.2f", math.abs(v.time))
+		end
+	end
+	-- animation updates
+	for i,v in pairs(visAnimations) do
+		if v.started and not v.finished then
+			-- anim time update
+			visAnimations[i].time =  v.time + dt
+			visAnimations[i].duration =  v.duration + dt
+			-- anim frame update
+			if v.time >= v.speed then
+				visAnimations[i].current = (v.current)%#v.img + 1
+				visAnimations[i].time = 0
+			end
+			-- anim activity update
+			if v.duration >= v.durationMax then
+				visAnimations[i].finished = true
+			end
 		end
 	end
 end
@@ -152,7 +191,7 @@ end
 function love.draw(dt)
 	for i,v in pairs(visObjects) do
 		if v.vis then
-			love.graphics.draw(v.img, v.pos[1], v.pos[2], v.rad)
+			love.graphics.draw(v.img, v.pos[1], v.pos[2], v.rad, 1, 1, v.pos[3], v.pos[3])
 		end
 	end
 	-- drawing in-game timer
@@ -163,6 +202,14 @@ function love.draw(dt)
 			string.format("\n%01.2f",timers.countdown.time),80,64)
 		if math.abs(timers.countdown.time) <= levels[level] then
 			love.graphics.print("Press SPACE!", 80, 96)
+		end
+	end
+	-- draw animations
+	for i,v in pairs(visAnimations) do
+		if v.started and not v.finished then
+			for j,w in ipairs(v.pos) do
+				love.graphics.draw(v.img[v.current], w[1], w[2], v.rad, 1, 1, v.origin[1], v.origin[2])
+			end
 		end
 	end
 end
