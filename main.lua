@@ -1,4 +1,6 @@
 function love.load()
+    love.graphics.setMode(360,640,0,0,0)
+   
 	math.randomseed( os.time() )
 	images = {
 		orbiter = love.graphics.newImage("discovery-orbiter.png"),
@@ -92,10 +94,19 @@ function love.load()
 	}
 	-- debug
 	level = "nub"
-	gameStart()
+	gameMenu()
+end
+
+function gameMenu()
+   gamestarted = 0
+
+   menubackground = love.graphics.newImage("startbildschirm.png")
+   love.graphics.draw(menubackground,0,0,0,1,1,0,0)
 end
 
 function gameStart()
+    gamestarted = 1
+
 	-- various timers
 	timers = {
 		game = {
@@ -120,36 +131,40 @@ function gameStart()
 	for i,v in ipairs(countdowns) do
 		countdowns[i].started = false
 		countdowns[i].finished = false
-	end
+    end
+
 	-- currently executed countdown
 	countdownCurrent = 1
 	-- visObjects are visible (vis) and not rotated (rad) and have no usable position (pos) yet
 	for i,v in pairs(visObjects) do
 		visObjects[i].vis = true
 		visObjects[i].rad = 0
-		visObjects[i].pos = {}
+		visObjects[i].pos =  {}
 	end
 	-- visObjects positionsReset
-	visObjects.orbiter.pos  = {368,536}
-	visObjects.booster1.pos = {358,536}
-	visObjects.booster2.pos = {378,536}
-	visObjects.tank.pos     = {368,536}
+	visObjects.orbiter.pos  = {148,536}
+	visObjects.booster1.pos = {138,536}
+	visObjects.booster2.pos = {158,536}
+	visObjects.tank.pos     = {148,536}
 	-- initial background color
 	love.graphics.setBackgroundColor( 40, 40, 80 )
 end
 
 function love.update(dt)
 	-- timer updates
+   if gamestarted == 1 then
 	for i,v in pairs(timers) do
 		if v.started then
 			timers[i].time = v.time - dt
 			-- visual timer for drawing
 			timers[i].visible = string.format("%03.2f", v.time)
 		end
-	end
+     end
+  end
 end
 
 function love.draw(dt)
+   if gamestarted == 1 then
 	for i,v in pairs(visObjects) do
 		if v.vis then
 			love.graphics.draw(v.img, v.pos[1], v.pos[2], v.rad)
@@ -164,7 +179,10 @@ function love.draw(dt)
 		if math.abs(timers.countdown.time) <= levels[level] then
 			love.graphics.print("Press SPACE!", 80, 96)
 		end
-	end
+     end
+  elseif gamestarted == 0 then
+     love.graphics.draw(menubackground, 0, 0, 0, 1, 1)
+  end
 end
 
 function love.keypressed(key, unicode)
@@ -180,5 +198,7 @@ function love.keypressed(key, unicode)
 		else
 			print("fail")
 		end
-	end
+     elseif key == ' ' then
+        gameStart()
+     end
 end
