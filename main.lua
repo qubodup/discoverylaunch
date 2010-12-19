@@ -8,7 +8,19 @@ function love.load()
 			cooling = {
 				love.graphics.newImage("animation-cooling-1-big.png"),
 				love.graphics.newImage("animation-cooling-2-big.png"),
-			}
+			},
+			sparks = {
+				love.graphics.newImage("animation-sparks-1-big.png"),
+				love.graphics.newImage("animation-sparks-2-big.png"),
+			},
+			engines = {
+				love.graphics.newImage("animation-engines-1-big.png"),
+				love.graphics.newImage("animation-engines-2-big.png"),
+			},
+			booster = {
+				love.graphics.newImage("animation-booster-1-big.png"),
+				love.graphics.newImage("animation-booster-2-big.png"),
+			},
 		},
 	}
 	-- objects that have positions and need to be drawn
@@ -31,15 +43,30 @@ function love.load()
 		cooling = {
 			img = images.animations.cooling,
 			durationMax = 7,
-			started = false,
-			finished = false,
-			pos = {{374,508}, {426,508}, {400,508}},
+			pos = {{378,508}, {424,508}, {404,508}},
 			origin = {64, 0},
 			speed = 0.3,
-			time = 0,
-			duration = 0,
-			current = 1,
-			rad = 0,
+		},
+		sparks = {
+			img = images.animations.sparks,
+			durationMax = 7,
+			pos = {{374,508}, {426,508},{400,508}},
+			origin = {64, 0},
+			speed = 0.1,
+		},
+		engines = {
+			img = images.animations.engines,
+			durationMax = 999,
+			pos = {{374,556}, {426,556}, {400,556}},
+			origin = {64, 0},
+			speed = 0.4,
+		},
+		booster = {
+			img = images.animations.booster,
+			durationMax = 60,
+			pos = {{324,556}, {476,556}},
+			origin = {64, 0},
+			speed = 0.2,
 		},
 	}
 	--[[ countdowns are the different stages in the game
@@ -60,7 +87,7 @@ function love.load()
 			title = "Sparks!",
 			time = 5,
 			code = {
-				success = function() end,
+				success = function() visAnimations.sparks.started = true end,
 				failure = function() end,
 			},
 		},
@@ -68,7 +95,7 @@ function love.load()
 			title = "Main Engines Start!",
 			time = 5,
 			code = {
-				success = function() end,
+				success = function() visAnimations.engines.started = true end,
 				failure = function() end,
 			},
 		},
@@ -76,7 +103,7 @@ function love.load()
 			title = "Booster Ignition!",
 			time = 5,
 			code = {
-				success = function() timers.ingame.started = true end,
+				success = function() visAnimations.booster.started = true timers.game.finished = true timers.countdown.finished = true gameOverStatus = "win" end,
 				failure = function() end,
 			},
 		},
@@ -114,6 +141,8 @@ function love.load()
 	}
 	-- debug
 	level = "nub"
+	-- gameOverStatus can be "win" or "lose"
+	gameOverStatus = nil
 	gameStart()
 end
 
@@ -156,6 +185,15 @@ function gameStart()
 	visObjects.booster1.pos = {324,300,256}
 	visObjects.booster2.pos = {476,300,256}
 	visObjects.tank.pos     = {400,300,256}
+	-- visAnimations defaults
+	for i,v in pairs(visAnimations) do
+		visAnimations[i].started = false
+		visAnimations[i].finished = false
+		visAnimations[i].time = 0
+		visAnimations[i].duration = 0
+		visAnimations[i].current = 1
+		visAnimations[i].rad = 0
+	end
 	-- initial background color
 	love.graphics.setBackgroundColor( 40, 40, 80 )
 end
@@ -163,7 +201,7 @@ end
 function love.update(dt)
 	-- timer updates
 	for i,v in pairs(timers) do
-		if v.started then
+		if v.started and not v.finished then
 			timers[i].time = v.time - dt
 			-- visual timer for drawing
 			timers[i].visible = string.format("%03.2f", math.abs(v.time))
@@ -212,6 +250,12 @@ function love.draw(dt)
 			end
 		end
 	end
+	-- Game over messages
+	if gameOverStatus == "win" then
+		love.graphics.print("Horray Houston!\nWe started after " .. string.format("%0.2f",math.abs(timers.game.time)) .. "s\nPress ESC or Q to quit", 80, 128)
+	elseif gameOverStatus == "lost" then
+		love.graphics.print("Houston! Damnit!\nPress ESC or Q to quit...", 80, 128)
+	end
 end
 
 function love.keypressed(key, unicode)
@@ -223,9 +267,10 @@ function love.keypressed(key, unicode)
 			countdowns[countdownCurrent].code.success()
 			if not (countdownCurrent == #countdowns) then countdownCurrent = countdownCurrent + 1 end
 			timers.countdown.time = countdowns[countdownCurrent].time
-			print("success")
 		else
-			print("fail")
+			gameOverStatus = "lost"
+			timers.game.finished = true
+			timers.countdown.finished = true
 		end
 	end
 end
