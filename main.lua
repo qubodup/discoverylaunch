@@ -254,7 +254,7 @@ function love.draw(dt)
 	if gameOverStatus == "win" then
 		love.graphics.print("Horray Houston!\nWe started after " .. string.format("%0.2f",math.abs(timers.game.time)) .. "s\nPress ESC or Q to quit", 80, 128)
 	elseif gameOverStatus == "lost" then
-		love.graphics.print("Houston! Damnit!\nPress ESC or Q to quit...", 80, 128)
+		love.graphics.print("Houston! Dammit!\nPress ESC or Q to quit...", 80, 128)
 	end
 end
 
