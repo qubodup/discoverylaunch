@@ -25,17 +25,17 @@ function love.load()
 	}
 	-- objects that have positions and need to be drawn
 	visObjects = {
-		orbiter = {
-			img = images.orbiter,
-		},
-		booster1 = {
-			img = images.booster,
-		},
-		booster2 = {
-			img = images.booster,
-		},
-		tank = {
+		{
 			img = images.tank,
+		},
+		{
+			img = images.booster,
+		},
+		{
+			img = images.booster,
+		},
+		{
+			img = images.orbiter,
 		},
 	}
 	-- animations that are being played for a specific time
@@ -181,10 +181,10 @@ function gameStart()
 		visObjects[i].pos = {}
 	end
 	-- visObjects positionsReset
-	visObjects.orbiter.pos  = {400,300,256}
-	visObjects.booster1.pos = {324,300,256}
-	visObjects.booster2.pos = {476,300,256}
-	visObjects.tank.pos     = {400,300,256}
+	visObjects[4].pos  = {400,300,256}
+	visObjects[2].pos = {324,300,256}
+	visObjects[3].pos = {476,300,256}
+	visObjects[1].pos     = {400,300,256}
 	-- visAnimations defaults
 	for i,v in pairs(visAnimations) do
 		visAnimations[i].started = false
@@ -227,7 +227,7 @@ function love.update(dt)
 end
 
 function love.draw(dt)
-	for i,v in pairs(visObjects) do
+	for i,v in ipairs(visObjects) do
 		if v.vis then
 			love.graphics.draw(v.img, v.pos[1], v.pos[2], v.rad, 1, 1, v.pos[3], v.pos[3])
 		end
